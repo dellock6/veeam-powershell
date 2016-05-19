@@ -19,7 +19,7 @@ $excludevms=@()
 ####################################################################
 
 $vcenterobj = Get-VBRServer -Name $vcenter
-$vmobjs = Find-VBRObject -Server $vcenterobj | Where-Object {$_.Type -eq "VirtualMachine"}
+$vmobjs = Find-VBRViEntity -Server $vcenterobj | Where-Object {$_.Type -eq "VirtualMachine"}
 $jobobjids = [Veeam.Backup.Core.CHierarchyObj]::GetObjectsOnHost($vcenterobj.id) | Where-Object {$_.GetItem().Type -eq "Vm"}
 
 # Convert exclusion list to simple regular expression
