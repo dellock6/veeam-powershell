@@ -1,8 +1,31 @@
 #
 # Verify protected VM's
 #
-# Luca Dell'Oca - https://github.com/dellock6
-# Released under GPL 3.0 license
+####################################################################
+#
+# MIT License
+#
+#Copyright (c) 2016 Tom Sightler
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+####################################################################
 #
 # Run the script against vCenter and Veeam server and checks which VM's
 # have been protected in the last 23 hours, and which are not protected
@@ -34,12 +57,12 @@ $HourstoCheck = 24
 $excludevms_regex = ('(?i)^(' + (($excludeVMs | ForEach {[regex]::escape($_)}) -join "|") + ')$') -replace "\\\*", ".*"
 $excludefolder_regex = ('(?i)^(' + (($excludeFolder | ForEach {[regex]::escape($_)}) -join "|") + ')$') -replace "\\\*", ".*"
 $excludedc_regex = ('(?i)^(' + (($excludeDC | ForEach {[regex]::escape($_)}) -join "|") + ')$') -replace "\\\*", ".*"
-   
+
 $vms=@{}
 
 # Build a hash table of all VMs.  Key is either Job Object Id (for any VM ever in a Veeam job) or vCenter ID+MoRef
 # Assume unprotected (!), and populate Cluster, DataCenter, and Name fields for hash key value
-Find-VBRViEntity | 
+Find-VBRViEntity |
     Where-Object {$_.Type -eq "Vm" -and $_.VmFolderName -notmatch $excludefolder_regex} |
     Where-Object {$_.Name -notmatch $excludevms_regex} |
     Where-Object {$_.Path.Split("\")[1] -notmatch $excludedc_regex} |
@@ -52,7 +75,7 @@ Find-VBRViEntity -VMsandTemplates |
     ForEach {$vms.Add(($_.FindObject().Id, $_.Id -ne $null)[0], @("!", $_.Path.Split("\")[1], $_.VmHostName, $_.Name))}
 
 # Find all backup task sessions that have ended in the last x hours and not ending in Failure
-$vbrtasksessions = (Get-VBRBackupSession | 
+$vbrtasksessions = (Get-VBRBackupSession |
     Where-Object {$_.JobType -eq "Backup" -and $_.EndTime -ge (Get-Date).addhours(-$HourstoCheck)}) |
     Get-VBRTaskSession | Where-Object {$_.Status -ne "Failed"}
 
